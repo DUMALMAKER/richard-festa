@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Aniversário de Richard Lucca 🎉</title>
+<style>
+:root{ --bg1:#1a0533; --bg2:#3b0f6e; --gold:#ffd166; --gold2:#f4b942; --card:#ffffff; --green:#22c55e; --red:#ef4444; }
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;}
+body{min-height:100vh;background:radial-gradient(1200px 600px at 80% -10%,#7c3aed55,transparent),linear-gradient(160deg,var(--bg1),var(--bg2));color:#fff;display:flex;align-items:center;justify-content:center;padding:24px;}
+.card{background:var(--card);color:#1f2937;border-radius:20px;max-width:680px;width:100%;padding:36px 32px;box-shadow:0 30px 60px #0008;position:relative;overflow:hidden;}
+.card::before{content:"🎈";position:absolute;font-size:120px;top:-30px;right:-20px;opacity:.12;transform:rotate(15deg);}
+h1{font-size:1.6rem;margin-bottom:6px;}
+.sub{color:#6b7280;margin-bottom:20px;}
+.badge{display:inline-block;padding:4px 12px;border-radius:999px;font-size:.8rem;font-weight:600;}
+.b-ok{background:#dcfce7;color:#166534;} .b-no{background:#fee2e2;color:#991b1b;} .b-pend{background:#f3f4f6;color:#6b7280;}
+.btn{border:none;border-radius:12px;padding:14px 22px;font-size:1rem;font-weight:700;cursor:pointer;transition:.15s;}
+.btn:active{transform:scale(.97);}
+.btn-green{background:var(--green);color:#fff;} .btn-green:hover{background:#16a34a;}
+.btn-red{background:#fee2e2;color:#991b1b;} .btn-red:hover{background:#fecaca;}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#4a2c00;} .btn-gold:hover{filter:brightness(1.05);}
+.btn-dark{background:#111827;color:#fff;} .btn-dark:hover{background:#1f2937;}
+.btn-sm{padding:8px 12px;font-size:.85rem;border-radius:8px;}
+input[type=text],input[type=password]{width:100%;padding:13px 14px;border:2px solid #e5e7eb;border-radius:12px;font-size:1rem;margin-bottom:12px;}
+input:focus{outline:none;border-color:#a855f7;}
+table{width:100%;border-collapse:collapse;margin-top:14px;font-size:.92rem;}
+th,td{padding:10px 8px;text-align:left;border-bottom:1px solid #eee;}
+.row{display:flex;gap:10px;flex-wrap:wrap;}
+.row input{flex:1;min-width:180px;margin-bottom:0;}
+.linkbox{display:flex;gap:8px;align-items:center;margin-top:8px;}
+.linkbox input{flex:1;font-size:.78rem;padding:8px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;color:#6b7280;}
+.counts{display:flex;gap:10px;margin:16px 0;flex-wrap:wrap;}
+.count{flex:1;min-width:110px;background:#f9fafb;border-radius:14px;padding:14px;text-align:center;}
+.count b{display:block;font-size:1.6rem;}
+.msg{margin-top:16px;padding:14px;border-radius:12px;font-weight:600;}
+.msg-ok{background:#dcfce7;color:#166534;} .msg-info{background:#ede9fe;color:#5b21b6;}
+.hero{text-align:center;padding:8px 0 4px;}
+.hero .emoji{font-size:56px;}
+.divider{height:1px;background:#eee;margin:22px 0;}
+a{color:#7c3aed;}
+@media(max-width:480px){.card{padding:26px 18px;} h1{font-size:1.3rem;}}
+</style>
+</head>
+<body>
+<div class="card" id="app"></div>
+<script>
+"use strict";
+/* ================== CONFIGURAÇÕES (edite aqui) ================== */
+const CONFIG = {
+  aniversariante: "Richard Lucca",
+  data:  "📅 Domingo, 20 de setembro de 2026, às 17h30",
+  local: "📍 Av. Ilhéus, Nº 336 — Centro, Itabuna (Espaço Celebrare)",
+  traje: "🏁 Tema Carros: ligue seu motor e venha comemorar!",
+  usuario: "admin",      // usuário da área do organizador
+  senha:   "resp12"       // senha da área do organizador
+};
+
+/* ================== CAMADA DE DADOS ==================
+   Se existir o servidor (server.js rodando), usa /api/rsvps.
+   Se não, salva no navegador (localStorage).                 */
+const LS_KEY = "rsvps_richard_lucca";
+let MODE = "local";
+async function initStore(){
+  try{
+    const r = await fetch("/api/rsvps", {cache:"no-store"});
+    if(r.ok){ MODE = "server"; return; }
+  }catch(e){}
+  MODE = "local";
+}
+async function carregar(){
+  if(MODE==="server"){ return await (await fetch("/api/rsvps",{cache:"no-store"})).json(); }
+  return JSON.parse(localStorage.getItem(LS_KEY) || "[]");
+}
+async function salvar(lista){
+  if(MODE==="server"){
+    await fetch("/api/rsvps",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({lista})});
+    return;
+  }
+  localStorage.setItem(LS_KEY, JSON.stringify(lista));
+}
+const uid  = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+const esc  = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function baseUrl(){ return location.href.split("?")[0]; }
+function linkPara(nome){ return baseUrl() + "?convidado=" + encodeURIComponent(nome); }
+async function copiar(txt){
+  try{ await navigator.clipboard.writeText(txt); return true; }
+  catch(e){
+    const ta=document.createElement("textarea"); ta.value=txt; document.body.appendChild(ta); ta.select();
+    try{ document.execCommand("copy"); return true; }catch(_){ return false; }
+    finally{ ta.remove(); }
+  }
+}
+const params  = new URLSearchParams(location.search);
+const nomeUrl = params.get("convidado") || params.get("nome");
+const app = document.getElementById("app");
+
+async function garantirConvidado(nome){
+  const lista = await carregar();
+  let p = lista.find(x => x.nome.toLowerCase() === nome.toLowerCase());
+  if(!p){
+    p = {id:uid(), nome:nome, status:"pendente", atualizadoEm:null};
+    lista.push(p); await salvar(lista);
+  }
+  return p;
+}
+
+/* ================== TELA DO CONVIDADO ================== */
+function renderConvidado(pessoa, msg){
+  const st = pessoa.status;
+  let banner = "";
+  if(msg==="confirmado") banner = `<div class="msg msg-ok">🎉 Presença confirmada! Te espero lá, ${esc(pessoa.nome)}!</div>`;
+  else if(msg==="recusado") banner = `<div class="msg" style="background:#fee2e2;color:#991b1b;">😢 Que pena, ${esc(pessoa.nome)}! Obrigado por avisar.</div>`;
+  app.innerHTML = `
+    <div class="hero"><div class="emoji">🎂🎈</div>
+      <h1>Aniversário de ${esc(CONFIG.aniversariante)}!</h1>
+      <p class="sub">Olá, <b>${esc(pessoa.nome)}</b>! Você está na lista de convidados. 🥳</p>
+    </div>
+    <p style="text-align:center;line-height:1.9;">${esc(CONFIG.data)}<br>${esc(CONFIG.local)}<br>${esc(CONFIG.traje)}</p>
+    <div class="divider"></div>
+    ${st==="confirmado" && msg!=="confirmado" ? `<div class="msg msg-ok">✅ Você já confirmou presença. Até lá!</div>`:""}
+    ${st==="recusado"  && msg!=="recusado"  ? `<div class="msg" style="background:#fee2e2;color:#991b1b;">Você informou que não poderá ir.</div>`:""}
+    ${banner}
+    <div class="row" style="margin-top:18px;justify-content:center;">
+      <button class="btn btn-green" onclick="responder('confirmado')">✅ Confirmar Presença</button>
+      <button class="btn btn-red"   onclick="responder('recusado')">❌ Não poderei ir</button>
+    </div>
+    <p style="margin-top:22px;text-align:center;font-size:.85rem;color:#9ca3af;">Só o organizador consegue ver a lista de convidados.</p>`;
+}
+async function responder(status){
+  const lista = await carregar();
+  const p = lista.find(x => x.nome.toLowerCase() === nomeUrl.toLowerCase());
+  if(p){
+    p.status = status;
+    p.atualizadoEm = new Date().toISOString();
+    await salvar(lista);
+    renderConvidado(p, status);
+  }
+}
+
+/* ================== TELA INICIAL (sem link) ================== */
+function renderInicio(){
+  app.innerHTML = `
+    <div class="hero"><div class="emoji">🎉🎂🎁</div>
+      <h1>Aniversário de ${esc(CONFIG.aniversariante)}!</h1>
+      <p class="sub">Confirmação de presença</p>
+    </div>
+    <p style="text-align:center;line-height:1.9;">${esc(CONFIG.data)}<br>${esc(CONFIG.local)}<br>${esc(CONFIG.traje)}</p>
+    <div class="msg msg-info" style="margin-top:20px;">💌 Para confirmar sua presença, abra o link personalizado que o organizador enviou com o seu nome.</div>
+    <div style="margin-top:18px;text-align:center;">
+      <button class="btn btn-dark" onclick="renderLogin()">🔐 Área do Organizador</button>
+    </div>`;
+}
+
+/* ================== ÁREA DO ORGANIZADOR ================== */
+function renderLogin(){
+  app.innerHTML = `
+    <h1>🔐 Área do Organizador</h1>
+    <p class="sub">Digite usuário e senha para gerenciar os convidados.</p>
+    <input type="text" id="usuario" placeholder="Usuário" autocomplete="username"/>
+    <input type="password" id="senha" placeholder="Senha" autocomplete="current-password" onkeydown="if(event.key==='Enter')tentarLogin()"/>
+    <button class="btn btn-gold" style="width:100%;" onclick="tentarLogin()">Entrar</button>
+    <div style="margin-top:14px;"><a href="#" onclick="renderInicio();return false;">← Voltar</a></div>
+    <div id="erroSenha"></div>`;
+  setTimeout(()=>document.getElementById("usuario").focus(),50);
+}
+function tentarLogin(){
+  const u = document.getElementById("usuario").value.trim();
+  const s = document.getElementById("senha").value;
+  if(u === CONFIG.usuario && s === CONFIG.senha){ sessionStorage.setItem("org_ok","1"); renderPainel(); }
+  else document.getElementById("erroSenha").innerHTML = `<div class="msg" style="background:#fee2e2;color:#991b1b;margin-top:14px;">Usuário ou senha incorretos.</div>`;
+}
+function badge(st){
+  if(st==="confirmado") return `<span class="badge b-ok">Confirmado</span>`;
+  if(st==="recusado")  return `<span class="badge b-no">Não vai</span>`;
+  return `<span class="badge b-pend">Pendente</span>`;
+}
+async function renderPainel(){
+  const lista = await carregar();
+  const nOk = lista.filter(x=>x.status==="confirmado").length;
+  const nNo = lista.filter(x=>x.status==="recusado").length;
+  const nPe = lista.length - nOk - nNo;
+  const linhas = lista.map(p => `
+    <tr>
+      <td><b>${esc(p.nome)}</b></td>
+      <td>${badge(p.status)}</td>
+      <td style="font-size:.78rem;color:#9ca3af;">${p.atualizadoEm ? new Date(p.atualizadoEm).toLocaleString("pt-BR") : "—"}</td>
+      <td style="white-space:nowrap;">
+        <button class="btn btn-sm btn-gold" onclick="copiarLink('${esc(p.nome)}')">🔗 Link</button>
+        <button class="btn btn-sm" style="background:#f3f4f6;" onclick="excluir('${p.id}')">🗑️</button>
+      </td>
+    </tr>`).join("");
+  app.innerHTML = `
+    <h1>🎛️ Painel do Organizador</h1>
+    <p class="sub">Aniversário de ${esc(CONFIG.aniversariante)} — ${MODE==="server" ? "dados salvos no servidor ✅" : "modo local (somente neste navegador) ⚠️"}</p>
+    <div class="counts">
+      <div class="count"><b style="color:#16a34a;">${nOk}</b>Confirmados</div>
+      <div class="count"><b style="color:#6b7280;">${nPe}</b>Pendentes</div>
+      <div class="count"><b style="color:#dc2626;">${nNo}</b>Não vão</div>
+    </div>
+    <div class="row">
+      <input type="text" id="novoNome" placeholder="Nome do convidado(a)" onkeydown="if(event.key==='Enter')adicionar()"/>
+      <button class="btn btn-gold" onclick="adicionar()">➕ Gerar link</button>
+    </div>
+    <div id="linkGerado"></div>
+    ${lista.length ? `<table><thead><tr><th>Convidado</th><th>Status</th><th>Atualizado</th><th>Ações</th></tr></thead><tbody>${linhas}</tbody></table>` : `<p style="margin-top:16px;color:#9ca3af;">Nenhum convidado ainda. Adicione acima para gerar um link.</p>`}
+    <div class="divider"></div>
+    <div class="row">
+      <button class="btn btn-dark btn-sm" onclick="exportar()">📋 Copiar lista</button>
+      <button class="btn btn-sm" style="background:#f3f4f6;" onclick="sair()">Sair</button>
+      <button class="btn btn-sm" style="background:#f3f4f6;" onclick="renderInicio()">← Início</button>
+    </div>
+    <div id="painelMsg"></div>`;
+}
+async function adicionar(){
+  const inp  = document.getElementById("novoNome");
+  const nome = inp.value.trim();
+  if(!nome) return;
+  const lista = await carregar();
+  if(lista.some(x=>x.nome.toLowerCase()===nome.toLowerCase())){
+    document.getElementById("linkGerado").innerHTML = `<div class="msg" style="background:#fef3c7;color:#92400e;margin-top:12px;">Este nome já existe na lista.</div>`;
+    return;
+  }
+  lista.push({id:uid(), nome, status:"pendente", atualizadoEm:null});
+  await salvar(lista);
+  const link = linkPara(nome);
+  await copiar(link);
+  await renderPainel();
+  document.getElementById("linkGerado").innerHTML = `
+    <div class="msg msg-ok" style="margin-top:12px;">✅ Link copiado! Envie para <b>${esc(nome)}</b>:</div>
+    <div class="linkbox"><input readonly value="${esc(link)}" onclick="this.select()"/></div>`;
+}
+async function copiarLink(nome){
+  const ok = await copiar(linkPara(nome));
+  document.getElementById("painelMsg").innerHTML = ok ? `<div class="msg msg-ok">🔗 Link de <b>${esc(nome)}</b> copiado!</div>` : "";
+}
+async function excluir(id){
+  if(!confirm("Remover este convidado?")) return;
+  await salvar((await carregar()).filter(x=>x.id!==id));
+  renderPainel();
+}
+async function exportar(){
+  const lista = await carregar();
+  const linhas = lista.map(p=>`• ${p.nome} — ${p.status==="confirmado"?"✅ Confirmado":p.status==="recusado"?"❌ Não vai":"⏳ Pendente"}`);
+  const txt = `🎂 Lista de convidados — Aniversário de ${CONFIG.aniversariante}\n\n${linhas.join("\n") || "(vazio)"}\n\n✅ Confirmados: ${lista.filter(x=>x.status==="confirmado").length} de ${lista.length}`;
+  await copiar(txt);
+  document.getElementById("painelMsg").innerHTML = `<div class="msg msg-ok">📋 Lista copiada para a área de transferência!</div>`;
+}
+function sair(){ sessionStorage.removeItem("org_ok"); renderInicio(); }
+
+/* ================== ROTEAMENTO ================== */
+(async function(){
+  await initStore();
+  if(nomeUrl){
+    const p = await garantirConvidado(nomeUrl);
+    renderConvidado(p);
+  } else if(sessionStorage.getItem("org_ok")==="1"){
+    renderPainel();
+  } else {
+    renderInicio();
+  }
+})();
+</script>
+</body>
+</html>
